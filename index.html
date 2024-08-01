@@ -1,0 +1,67 @@
+<html>
+<body>
+  <!-- Include Lexical via CDN -->
+  <script src="lexical.js"></script>
+  <script src="lexical.selection.js"></script>
+  <script src="lexical.utils.js"></script>
+  <script src="lexical.html.js"></script>
+  <script src="lexical.clipboard.js"></script>
+  <script src="lexical.richtext.js"></script>
+  <script src="lexical.history.js"></script>
+  <script src="lexical.dragon.js"></script>
+  <script src="index.js"></script>
+  <div id="editor" contenteditable="true"></div>
+  <h4>Editor state:</h4>
+  <textarea id="lexical-state"></textarea>
+  <script >
+    const stateRef = document.getElementById(
+        'lexical-state',
+      )
+    const initialConfig = {
+      namespace: 'Vanilla JS Demo',
+      // Register nodes specific for @lexical/rich-text
+      nodes: [HeadingNode, QuoteNode],
+      onError: (error) => {
+        throw error;
+      },
+      theme: {
+        // Adding styling to Quote node, see styles.css
+        quote: 'PlaygroundEditorTheme__quote',
+      },
+    };
+    // Create an editor instance
+    const editor = lexical.createEditor(initialConfig);
+    // Set the root element (where you want to edit content)
+    const contentEditableElement = document.getElementById('editor');
+    editor.setRootElement(contentEditableElement);
+
+    mergeRegister(
+      registerRichText(editor),
+      registerDragonSupport(editor),
+      registerHistory(editor, createEmptyHistoryState(), 300),
+    );
+
+    // editor.update($prepopulatedRichText, {tag: 'history-merge'})
+
+    editor.update(() => {
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(htmlString, "text/html");
+
+      var nodes = html.$generateNodesFromDOM(editor, dom)
+
+      lexical.$getRoot().select();
+
+      const _selection = lexical.$getSelection();
+      _selection.insertNodes(nodes);
+
+    }, {discrete: true, onUpdate: () => {  
+      console.log(editor.getEditorState().exportJSON())
+    }});
+
+    // const dom = new JSDOM("<h1>Hello</h1>");
+
+
+  </script>
+  <!-- Your content editable element -->
+</body>
+</html>
