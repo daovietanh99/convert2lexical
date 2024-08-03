@@ -41,22 +41,29 @@
       registerHistory(editor, createEmptyHistoryState(), 300),
     );
 
+    fetch("http://localhost:8000/api/mongo/")
+    .then(res => res.json())
+    .then(res => {
+      console.log("DOCUMENTs", res)
+      stateRef.value = JSON.stringify(res)
+    })
+
     // editor.update($prepopulatedRichText, {tag: 'history-merge'})
-
-    editor.update(() => {
-      const parser = new DOMParser();
-      const dom = parser.parseFromString(htmlString, "text/html");
-
-      var nodes = html.$generateNodesFromDOM(editor, dom)
-
-      lexical.$getRoot().select();
-
-      const _selection = lexical.$getSelection();
-      _selection.insertNodes(nodes);
-
-    }, {discrete: true, onUpdate: () => {  
-      console.log(editor.getEditorState().exportJSON())
-    }});
+    
+    for (let i = 0; i < 2; i = i+1) {
+      console.log(i)
+      editor.update(() => {
+        lexical.$getRoot().clear();
+        var parser = new DOMParser();
+        var dom = parser.parseFromString(htmlString[i], "text/html");
+        var nodes = html.$generateNodesFromDOM(editor, dom)
+        lexical.$getRoot().select();
+        const _selection = lexical.$getSelection();
+        _selection.insertNodes(nodes);
+      }, {discrete: true, onUpdate: () => {  
+        console.log(editor.getEditorState().exportJSON())
+      }});
+    }
 
     // const dom = new JSDOM("<h1>Hello</h1>");
 
